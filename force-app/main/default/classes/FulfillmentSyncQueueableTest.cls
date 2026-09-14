@@ -9,13 +9,17 @@ private class FulfillmentSyncQueueableTest {
         	Name = 'Test Deal - Success',
             Amount = 5000,
             StageName = 'Closed Won',
-            CloseDate = Date.today()
+            CloseDate = Date.today(),
+            Shipping_Priority__c = 'Expedited'
         );
         insert testOpp;
         
         Test.startTest();
         FulfillmentSyncQueueable.enqueueSync(new Set<Id>{ testOpp.Id });
         Test.stopTest();
+
+        System.assert(FulfillmentMockResponse.lastRequestBody.contains('Expedited'),
+        'Expected the payload sent to the external system to include the shipping priority.');
         
         Opportunity updatedOpp = [
             SELECT Fulfillment_Order_Id__c, Fulfillment_Sync_Status__c

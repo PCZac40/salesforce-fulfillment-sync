@@ -14,7 +14,8 @@ public class FulfillmentSyncService {
         Map<String, Object> payload = new Map<String, Object>{
             'title' => 'Fulfillment Order for: ' + opp.Name,
             'body' => 'Opportunity' + opp.Id + ' closed won. Amount: ' + opp.Amount,
-            'userId' => 1
+            'userId' => 1,
+            'shippingPriority' => opp.Shipping_Priority__c
         };
         request.setBody(JSON.serialize(payload));
         
