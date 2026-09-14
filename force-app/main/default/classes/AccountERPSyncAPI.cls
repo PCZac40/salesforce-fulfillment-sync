@@ -10,6 +10,7 @@ global class AccountERPSyncAPI {
         
         String erpProspectId = (String) body.get('erpProspectId');
         String customerNumber = (String) body.get('customerNumber');
+        String creditTerms = (String) body.get('creditTerms');
         
         if (erpProspectId == null || customerNumber == null) {
             res.statusCode = 400;
@@ -38,6 +39,9 @@ global class AccountERPSyncAPI {
             acc.ERP_Customer_Number__c = customerNumber;
             acc.Account_Status__c = 'Customer';
             acc.Customer_Since_Date__c = Date.today();
+            if (creditTerms != null) { 
+                acc.Credit_Terms__c = creditTerms;
+            }
             update acc;
             
             res.statusCode = 200;

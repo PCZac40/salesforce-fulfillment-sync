@@ -1,6 +1,6 @@
 public class AccountLockHandler {
     private static final Set<String> LOCKED_FIELDS = new Set<String>{
-        'Name', 'BillingStreet', 'BillingCity', 'BillingState', 'BillingPostalCode', 'BillingCountry', 'Phone'
+        'Name', 'BillingStreet', 'BillingCity', 'BillingState', 'BillingPostalCode', 'BillingCountry', 'Phone', 'Credit_Terms__c'
     };
 
     public static void enforceFieldLock(List<Account> newAccounts, Map<Id, Account> oldMap) {
@@ -27,6 +27,9 @@ public class AccountLockHandler {
             }
             if (acc.Phone != oldAcc.Phone) {
                 acc.Phone.addError('Phone can only be updated by the ERP system once this Account is an official Customer.');
+            }
+            if (acc.Credit_Terms__c != oldAcc.Credit_Terms__c) {
+                acc.Credit_Terms__c.addError('Credit terms can only be updated by the ERP system once this Account is an official Customer.');
             }
         }
     }

@@ -86,4 +86,46 @@ private class AccountLockTriggerTest {
         Account updatedAcc = [SELECT Name FROM Account WHERE Id = :acc.Id];
         System.assertEquals('Changed By ERP User', updatedAcc.Name);
     }
+
+    @isTest
+    static void testCreditTermsBlockedForNormalUser() {
+    Profile standardProfile = [SELECT Id FROM Profile WHERE Name = 'Standard User' LIMIT 1];
+
+    User normalUser = new User(
+        FirstName = 'CreditTerms',
+        LastName = 'Tester',
+        Email = 'creditterms.tester@example.com',
+        Username = 'creditterms.tester' + DateTime.now().getTime() + '@example.com',
+        Alias = 'crdtt',
+        TimeZoneSidKey = 'America/Los_Angeles',
+        LocaleSidKey = 'en_US',
+        EmailEncodingKey = 'UTF-8',
+        LanguageLocaleKey = 'en_US',
+        ProfileId = standardProfile.Id
+    );
+
+    System.runAs(new User(Id = UserInfo.getUserId())) {
+        insert normalUser;
+    }
+
+    Account acc = new Account(Name = 'Credit Terms Test Co');
+    insert acc;
+    acc.Account_Status__c = 'Customer';
+    acc.Credit_Terms__c = 'Net 30';
+    update acc;
+
+    Boolean exceptionThrown = false;
+
+    System.runAs(normalUser) {
+        acc.Credit_Terms__c = 'Net 60';
+        try {
+            update acc;
+        } catch (DmlException e) {
+            exceptionThrown = true;
+            System.assert(e.getMessage().contains('Credit terms can only be updated by the ERP system'));
+        }
+    }
+
+    System.assert(exceptionThrown, 'Expected the Credit Terms change to be blocked for a normal user.');
+    }
 }
